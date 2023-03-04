@@ -163,7 +163,8 @@ func (UpgradeResourceType) EnumDescriptor() ([]byte, []int) {
 type NodePoolUpdateStrategy int32
 
 const (
-	// Default value.
+	// Default value if unset. GKE internally defaults the update strategy to
+	// SURGE for unspecified strategies.
 	NodePoolUpdateStrategy_NODE_POOL_UPDATE_STRATEGY_UNSPECIFIED NodePoolUpdateStrategy = 0
 	// blue-green upgrade.
 	NodePoolUpdateStrategy_BLUE_GREEN NodePoolUpdateStrategy = 2
@@ -3003,7 +3004,9 @@ type NodeConfig struct {
 	// The total size of all keys and values must be less than 512 KB.
 	Metadata map[string]string `protobuf:"bytes,4,rep,name=metadata,proto3" json:"metadata,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
 	// The image type to use for this node. Note that for a given image type,
-	// the latest version of it will be used.
+	// the latest version of it will be used. Please see
+	// https://cloud.google.com/kubernetes-engine/docs/concepts/node-images for
+	// available image types.
 	ImageType string `protobuf:"bytes,5,opt,name=image_type,json=imageType,proto3" json:"image_type,omitempty"`
 	// The map of Kubernetes labels (key/value pairs) to be applied to each node.
 	// These will added in addition to any default label(s) that
@@ -3964,7 +3967,7 @@ func (x *ReservationAffinity) GetValues() []string {
 	return nil
 }
 
-// Kubernetes taint is comprised of three fields: key, value, and effect. Effect
+// Kubernetes taint is composed of three fields: key, value, and effect. Effect
 // can only be one of three types:  NoSchedule, PreferNoSchedule or NoExecute.
 //
 // See
@@ -5685,7 +5688,8 @@ type IPAllocationPolicy struct {
 	StackType IPAllocationPolicy_StackType `protobuf:"varint,16,opt,name=stack_type,json=stackType,proto3,enum=google.container.v1beta1.IPAllocationPolicy_StackType" json:"stack_type,omitempty"`
 	// The ipv6 access type (internal or external) when create_subnetwork is true
 	Ipv6AccessType IPAllocationPolicy_IPv6AccessType `protobuf:"varint,17,opt,name=ipv6_access_type,json=ipv6AccessType,proto3,enum=google.container.v1beta1.IPAllocationPolicy_IPv6AccessType" json:"ipv6_access_type,omitempty"`
-	// Output only. [Output only] The subnet's IPv6 CIDR block used by nodes and pods.
+	// Output only. [Output only] The subnet's IPv6 CIDR block used by nodes and
+	// pods.
 	SubnetIpv6CidrBlock string `protobuf:"bytes,22,opt,name=subnet_ipv6_cidr_block,json=subnetIpv6CidrBlock,proto3" json:"subnet_ipv6_cidr_block,omitempty"`
 	// Output only. [Output only] The services IPv6 CIDR block for the cluster.
 	ServicesIpv6CidrBlock string `protobuf:"bytes,23,opt,name=services_ipv6_cidr_block,json=servicesIpv6CidrBlock,proto3" json:"services_ipv6_cidr_block,omitempty"`
@@ -8334,7 +8338,9 @@ type UpdateNodePoolRequest struct {
 	// - "1.X.Y-gke.N": picks an explicit Kubernetes version
 	// - "-": picks the Kubernetes master version
 	NodeVersion string `protobuf:"bytes,5,opt,name=node_version,json=nodeVersion,proto3" json:"node_version,omitempty"`
-	// Required. The desired image type for the node pool.
+	// Required. The desired image type for the node pool. Please see
+	// https://cloud.google.com/kubernetes-engine/docs/concepts/node-images for
+	// available image types.
 	ImageType string `protobuf:"bytes,6,opt,name=image_type,json=imageType,proto3" json:"image_type,omitempty"`
 	// The desired list of Google Compute Engine
 	// [zones](https://cloud.google.com/compute/docs/zones#available) in which the
@@ -8955,8 +8961,8 @@ type SetAddonsConfigRequest struct {
 	//
 	// Deprecated: Do not use.
 	ClusterId string `protobuf:"bytes,3,opt,name=cluster_id,json=clusterId,proto3" json:"cluster_id,omitempty"`
-	// Required. The desired configurations for the various addons available to run in the
-	// cluster.
+	// Required. The desired configurations for the various addons available to
+	// run in the cluster.
 	AddonsConfig *AddonsConfig `protobuf:"bytes,4,opt,name=addons_config,json=addonsConfig,proto3" json:"addons_config,omitempty"`
 	// The name (project, location, cluster) of the cluster to set addons.
 	// Specified in the format `projects/*/locations/*/clusters/*`.
@@ -10692,7 +10698,9 @@ type NodePool struct {
 	NetworkConfig *NodeNetworkConfig `protobuf:"bytes,14,opt,name=network_config,json=networkConfig,proto3" json:"network_config,omitempty"`
 	// [Output only] Server-defined URL for the resource.
 	SelfLink string `protobuf:"bytes,100,opt,name=self_link,json=selfLink,proto3" json:"self_link,omitempty"`
-	// The version of the Kubernetes of this node.
+	// The version of Kubernetes running on this NodePool's nodes. If unspecified,
+	// it defaults as described
+	// [here](https://cloud.google.com/kubernetes-engine/versioning#specifying_node_version).
 	Version string `protobuf:"bytes,101,opt,name=version,proto3" json:"version,omitempty"`
 	// [Output only] The resource URLs of the [managed instance
 	// groups](https://cloud.google.com/compute/docs/instance-groups/creating-groups-of-managed-instances)
@@ -10724,8 +10732,8 @@ type NodePool struct {
 	UpgradeSettings *NodePool_UpgradeSettings `protobuf:"bytes,107,opt,name=upgrade_settings,json=upgradeSettings,proto3" json:"upgrade_settings,omitempty"`
 	// Specifies the node placement policy.
 	PlacementPolicy *NodePool_PlacementPolicy `protobuf:"bytes,108,opt,name=placement_policy,json=placementPolicy,proto3" json:"placement_policy,omitempty"`
-	// Output only. [Output only] Update info contains relevant information during a node
-	// pool update.
+	// Output only. [Output only] Update info contains relevant information during
+	// a node pool update.
 	UpdateInfo *NodePool_UpdateInfo `protobuf:"bytes,109,opt,name=update_info,json=updateInfo,proto3" json:"update_info,omitempty"`
 	// This checksum is computed by the server based on the value of node pool
 	// fields, and may be sent on update requests to ensure the client has an
@@ -12059,8 +12067,7 @@ type AutoprovisioningNodePoolDefaults struct {
 	// information, read [how to specify min CPU
 	// platform](https://cloud.google.com/compute/docs/instances/specify-min-cpu-platform).
 	// This field is deprecated, min_cpu_platform should be specified using
-	// https://cloud.google.com/requested-min-cpu-platform label selector on the
-	// pod.
+	// `cloud.google.com/requested-min-cpu-platform` label selector on the pod.
 	// To unset the min cpu platform field pass "automatic"
 	// as field value.
 	//
@@ -12085,7 +12092,9 @@ type AutoprovisioningNodePoolDefaults struct {
 	// see:
 	// https://cloud.google.com/compute/docs/disks/customer-managed-encryption
 	BootDiskKmsKey string `protobuf:"bytes,9,opt,name=boot_disk_kms_key,json=bootDiskKmsKey,proto3" json:"boot_disk_kms_key,omitempty"`
-	// The image type to use for NAP created node.
+	// The image type to use for NAP created node. Please see
+	// https://cloud.google.com/kubernetes-engine/docs/concepts/node-images for
+	// available image types.
 	ImageType string `protobuf:"bytes,10,opt,name=image_type,json=imageType,proto3" json:"image_type,omitempty"`
 }
 
@@ -20708,37 +20717,37 @@ var file_google_container_v1beta1_cluster_service_proto_rawDesc = []byte{
 	0x7b, 0x70, 0x72, 0x6f, 0x6a, 0x65, 0x63, 0x74, 0x5f, 0x69, 0x64, 0x7d, 0x2f, 0x7a, 0x6f, 0x6e,
 	0x65, 0x73, 0x2f, 0x7b, 0x7a, 0x6f, 0x6e, 0x65, 0x7d, 0x2f, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72,
 	0x63, 0x6f, 0x6e, 0x66, 0x69, 0x67, 0xda, 0x41, 0x0f, 0x70, 0x72, 0x6f, 0x6a, 0x65, 0x63, 0x74,
-	0x5f, 0x69, 0x64, 0x2c, 0x7a, 0x6f, 0x6e, 0x65, 0x12, 0xa5, 0x02, 0x0a, 0x0d, 0x4c, 0x69, 0x73,
-	0x74, 0x4e, 0x6f, 0x64, 0x65, 0x50, 0x6f, 0x6f, 0x6c, 0x73, 0x12, 0x2e, 0x2e, 0x67, 0x6f, 0x6f,
-	0x67, 0x6c, 0x65, 0x2e, 0x63, 0x6f, 0x6e, 0x74, 0x61, 0x69, 0x6e, 0x65, 0x72, 0x2e, 0x76, 0x31,
-	0x62, 0x65, 0x74, 0x61, 0x31, 0x2e, 0x4c, 0x69, 0x73, 0x74, 0x4e, 0x6f, 0x64, 0x65, 0x50, 0x6f,
-	0x6f, 0x6c, 0x73, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x2f, 0x2e, 0x67, 0x6f, 0x6f,
-	0x67, 0x6c, 0x65, 0x2e, 0x63, 0x6f, 0x6e, 0x74, 0x61, 0x69, 0x6e, 0x65, 0x72, 0x2e, 0x76, 0x31,
-	0x62, 0x65, 0x74, 0x61, 0x31, 0x2e, 0x4c, 0x69, 0x73, 0x74, 0x4e, 0x6f, 0x64, 0x65, 0x50, 0x6f,
-	0x6f, 0x6c, 0x73, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0xb2, 0x01, 0x82, 0xd3,
-	0xe4, 0x93, 0x02, 0x8e, 0x01, 0x12, 0x3d, 0x2f, 0x76, 0x31, 0x62, 0x65, 0x74, 0x61, 0x31, 0x2f,
-	0x7b, 0x70, 0x61, 0x72, 0x65, 0x6e, 0x74, 0x3d, 0x70, 0x72, 0x6f, 0x6a, 0x65, 0x63, 0x74, 0x73,
-	0x2f, 0x2a, 0x2f, 0x6c, 0x6f, 0x63, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x73, 0x2f, 0x2a, 0x2f, 0x63,
-	0x6c, 0x75, 0x73, 0x74, 0x65, 0x72, 0x73, 0x2f, 0x2a, 0x7d, 0x2f, 0x6e, 0x6f, 0x64, 0x65, 0x50,
-	0x6f, 0x6f, 0x6c, 0x73, 0x5a, 0x4d, 0x12, 0x4b, 0x2f, 0x76, 0x31, 0x62, 0x65, 0x74, 0x61, 0x31,
-	0x2f, 0x70, 0x72, 0x6f, 0x6a, 0x65, 0x63, 0x74, 0x73, 0x2f, 0x7b, 0x70, 0x72, 0x6f, 0x6a, 0x65,
-	0x63, 0x74, 0x5f, 0x69, 0x64, 0x7d, 0x2f, 0x7a, 0x6f, 0x6e, 0x65, 0x73, 0x2f, 0x7b, 0x7a, 0x6f,
-	0x6e, 0x65, 0x7d, 0x2f, 0x63, 0x6c, 0x75, 0x73, 0x74, 0x65, 0x72, 0x73, 0x2f, 0x7b, 0x63, 0x6c,
-	0x75, 0x73, 0x74, 0x65, 0x72, 0x5f, 0x69, 0x64, 0x7d, 0x2f, 0x6e, 0x6f, 0x64, 0x65, 0x50, 0x6f,
-	0x6f, 0x6c, 0x73, 0xda, 0x41, 0x1a, 0x70, 0x72, 0x6f, 0x6a, 0x65, 0x63, 0x74, 0x5f, 0x69, 0x64,
-	0x2c, 0x7a, 0x6f, 0x6e, 0x65, 0x2c, 0x63, 0x6c, 0x75, 0x73, 0x74, 0x65, 0x72, 0x5f, 0x69, 0x64,
-	0x12, 0xb5, 0x01, 0x0a, 0x0e, 0x47, 0x65, 0x74, 0x4a, 0x53, 0x4f, 0x4e, 0x57, 0x65, 0x62, 0x4b,
-	0x65, 0x79, 0x73, 0x12, 0x2f, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x63, 0x6f, 0x6e,
-	0x74, 0x61, 0x69, 0x6e, 0x65, 0x72, 0x2e, 0x76, 0x31, 0x62, 0x65, 0x74, 0x61, 0x31, 0x2e, 0x47,
-	0x65, 0x74, 0x4a, 0x53, 0x4f, 0x4e, 0x57, 0x65, 0x62, 0x4b, 0x65, 0x79, 0x73, 0x52, 0x65, 0x71,
-	0x75, 0x65, 0x73, 0x74, 0x1a, 0x30, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x63, 0x6f,
-	0x6e, 0x74, 0x61, 0x69, 0x6e, 0x65, 0x72, 0x2e, 0x76, 0x31, 0x62, 0x65, 0x74, 0x61, 0x31, 0x2e,
-	0x47, 0x65, 0x74, 0x4a, 0x53, 0x4f, 0x4e, 0x57, 0x65, 0x62, 0x4b, 0x65, 0x79, 0x73, 0x52, 0x65,
-	0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x40, 0x82, 0xd3, 0xe4, 0x93, 0x02, 0x3a, 0x12, 0x38,
-	0x2f, 0x76, 0x31, 0x62, 0x65, 0x74, 0x61, 0x31, 0x2f, 0x7b, 0x70, 0x61, 0x72, 0x65, 0x6e, 0x74,
-	0x3d, 0x70, 0x72, 0x6f, 0x6a, 0x65, 0x63, 0x74, 0x73, 0x2f, 0x2a, 0x2f, 0x6c, 0x6f, 0x63, 0x61,
-	0x74, 0x69, 0x6f, 0x6e, 0x73, 0x2f, 0x2a, 0x2f, 0x63, 0x6c, 0x75, 0x73, 0x74, 0x65, 0x72, 0x73,
-	0x2f, 0x2a, 0x7d, 0x2f, 0x6a, 0x77, 0x6b, 0x73, 0x12, 0xb0, 0x02, 0x0a, 0x0b, 0x47, 0x65, 0x74,
+	0x5f, 0x69, 0x64, 0x2c, 0x7a, 0x6f, 0x6e, 0x65, 0x12, 0xb5, 0x01, 0x0a, 0x0e, 0x47, 0x65, 0x74,
+	0x4a, 0x53, 0x4f, 0x4e, 0x57, 0x65, 0x62, 0x4b, 0x65, 0x79, 0x73, 0x12, 0x2f, 0x2e, 0x67, 0x6f,
+	0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x63, 0x6f, 0x6e, 0x74, 0x61, 0x69, 0x6e, 0x65, 0x72, 0x2e, 0x76,
+	0x31, 0x62, 0x65, 0x74, 0x61, 0x31, 0x2e, 0x47, 0x65, 0x74, 0x4a, 0x53, 0x4f, 0x4e, 0x57, 0x65,
+	0x62, 0x4b, 0x65, 0x79, 0x73, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x30, 0x2e, 0x67,
+	0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x63, 0x6f, 0x6e, 0x74, 0x61, 0x69, 0x6e, 0x65, 0x72, 0x2e,
+	0x76, 0x31, 0x62, 0x65, 0x74, 0x61, 0x31, 0x2e, 0x47, 0x65, 0x74, 0x4a, 0x53, 0x4f, 0x4e, 0x57,
+	0x65, 0x62, 0x4b, 0x65, 0x79, 0x73, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x40,
+	0x82, 0xd3, 0xe4, 0x93, 0x02, 0x3a, 0x12, 0x38, 0x2f, 0x76, 0x31, 0x62, 0x65, 0x74, 0x61, 0x31,
+	0x2f, 0x7b, 0x70, 0x61, 0x72, 0x65, 0x6e, 0x74, 0x3d, 0x70, 0x72, 0x6f, 0x6a, 0x65, 0x63, 0x74,
+	0x73, 0x2f, 0x2a, 0x2f, 0x6c, 0x6f, 0x63, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x73, 0x2f, 0x2a, 0x2f,
+	0x63, 0x6c, 0x75, 0x73, 0x74, 0x65, 0x72, 0x73, 0x2f, 0x2a, 0x7d, 0x2f, 0x6a, 0x77, 0x6b, 0x73,
+	0x12, 0xa5, 0x02, 0x0a, 0x0d, 0x4c, 0x69, 0x73, 0x74, 0x4e, 0x6f, 0x64, 0x65, 0x50, 0x6f, 0x6f,
+	0x6c, 0x73, 0x12, 0x2e, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x63, 0x6f, 0x6e, 0x74,
+	0x61, 0x69, 0x6e, 0x65, 0x72, 0x2e, 0x76, 0x31, 0x62, 0x65, 0x74, 0x61, 0x31, 0x2e, 0x4c, 0x69,
+	0x73, 0x74, 0x4e, 0x6f, 0x64, 0x65, 0x50, 0x6f, 0x6f, 0x6c, 0x73, 0x52, 0x65, 0x71, 0x75, 0x65,
+	0x73, 0x74, 0x1a, 0x2f, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x63, 0x6f, 0x6e, 0x74,
+	0x61, 0x69, 0x6e, 0x65, 0x72, 0x2e, 0x76, 0x31, 0x62, 0x65, 0x74, 0x61, 0x31, 0x2e, 0x4c, 0x69,
+	0x73, 0x74, 0x4e, 0x6f, 0x64, 0x65, 0x50, 0x6f, 0x6f, 0x6c, 0x73, 0x52, 0x65, 0x73, 0x70, 0x6f,
+	0x6e, 0x73, 0x65, 0x22, 0xb2, 0x01, 0x82, 0xd3, 0xe4, 0x93, 0x02, 0x8e, 0x01, 0x12, 0x3d, 0x2f,
+	0x76, 0x31, 0x62, 0x65, 0x74, 0x61, 0x31, 0x2f, 0x7b, 0x70, 0x61, 0x72, 0x65, 0x6e, 0x74, 0x3d,
+	0x70, 0x72, 0x6f, 0x6a, 0x65, 0x63, 0x74, 0x73, 0x2f, 0x2a, 0x2f, 0x6c, 0x6f, 0x63, 0x61, 0x74,
+	0x69, 0x6f, 0x6e, 0x73, 0x2f, 0x2a, 0x2f, 0x63, 0x6c, 0x75, 0x73, 0x74, 0x65, 0x72, 0x73, 0x2f,
+	0x2a, 0x7d, 0x2f, 0x6e, 0x6f, 0x64, 0x65, 0x50, 0x6f, 0x6f, 0x6c, 0x73, 0x5a, 0x4d, 0x12, 0x4b,
+	0x2f, 0x76, 0x31, 0x62, 0x65, 0x74, 0x61, 0x31, 0x2f, 0x70, 0x72, 0x6f, 0x6a, 0x65, 0x63, 0x74,
+	0x73, 0x2f, 0x7b, 0x70, 0x72, 0x6f, 0x6a, 0x65, 0x63, 0x74, 0x5f, 0x69, 0x64, 0x7d, 0x2f, 0x7a,
+	0x6f, 0x6e, 0x65, 0x73, 0x2f, 0x7b, 0x7a, 0x6f, 0x6e, 0x65, 0x7d, 0x2f, 0x63, 0x6c, 0x75, 0x73,
+	0x74, 0x65, 0x72, 0x73, 0x2f, 0x7b, 0x63, 0x6c, 0x75, 0x73, 0x74, 0x65, 0x72, 0x5f, 0x69, 0x64,
+	0x7d, 0x2f, 0x6e, 0x6f, 0x64, 0x65, 0x50, 0x6f, 0x6f, 0x6c, 0x73, 0xda, 0x41, 0x1a, 0x70, 0x72,
+	0x6f, 0x6a, 0x65, 0x63, 0x74, 0x5f, 0x69, 0x64, 0x2c, 0x7a, 0x6f, 0x6e, 0x65, 0x2c, 0x63, 0x6c,
+	0x75, 0x73, 0x74, 0x65, 0x72, 0x5f, 0x69, 0x64, 0x12, 0xb0, 0x02, 0x0a, 0x0b, 0x47, 0x65, 0x74,
 	0x4e, 0x6f, 0x64, 0x65, 0x50, 0x6f, 0x6f, 0x6c, 0x12, 0x2c, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c,
 	0x65, 0x2e, 0x63, 0x6f, 0x6e, 0x74, 0x61, 0x69, 0x6e, 0x65, 0x72, 0x2e, 0x76, 0x31, 0x62, 0x65,
 	0x74, 0x61, 0x31, 0x2e, 0x47, 0x65, 0x74, 0x4e, 0x6f, 0x64, 0x65, 0x50, 0x6f, 0x6f, 0x6c, 0x52,
@@ -21574,8 +21583,8 @@ var file_google_container_v1beta1_cluster_service_proto_depIdxs = []int32{
 	111, // 280: google.container.v1beta1.ClusterManager.GetOperation:input_type -> google.container.v1beta1.GetOperationRequest
 	113, // 281: google.container.v1beta1.ClusterManager.CancelOperation:input_type -> google.container.v1beta1.CancelOperationRequest
 	115, // 282: google.container.v1beta1.ClusterManager.GetServerConfig:input_type -> google.container.v1beta1.GetServerConfigRequest
-	120, // 283: google.container.v1beta1.ClusterManager.ListNodePools:input_type -> google.container.v1beta1.ListNodePoolsRequest
-	179, // 284: google.container.v1beta1.ClusterManager.GetJSONWebKeys:input_type -> google.container.v1beta1.GetJSONWebKeysRequest
+	179, // 283: google.container.v1beta1.ClusterManager.GetJSONWebKeys:input_type -> google.container.v1beta1.GetJSONWebKeysRequest
+	120, // 284: google.container.v1beta1.ClusterManager.ListNodePools:input_type -> google.container.v1beta1.ListNodePoolsRequest
 	121, // 285: google.container.v1beta1.ClusterManager.GetNodePool:input_type -> google.container.v1beta1.GetNodePoolRequest
 	118, // 286: google.container.v1beta1.ClusterManager.CreateNodePool:input_type -> google.container.v1beta1.CreateNodePoolRequest
 	119, // 287: google.container.v1beta1.ClusterManager.DeleteNodePool:input_type -> google.container.v1beta1.DeleteNodePoolRequest
@@ -21608,8 +21617,8 @@ var file_google_container_v1beta1_cluster_service_proto_depIdxs = []int32{
 	95,  // 314: google.container.v1beta1.ClusterManager.GetOperation:output_type -> google.container.v1beta1.Operation
 	230, // 315: google.container.v1beta1.ClusterManager.CancelOperation:output_type -> google.protobuf.Empty
 	116, // 316: google.container.v1beta1.ClusterManager.GetServerConfig:output_type -> google.container.v1beta1.ServerConfig
-	136, // 317: google.container.v1beta1.ClusterManager.ListNodePools:output_type -> google.container.v1beta1.ListNodePoolsResponse
-	181, // 318: google.container.v1beta1.ClusterManager.GetJSONWebKeys:output_type -> google.container.v1beta1.GetJSONWebKeysResponse
+	181, // 317: google.container.v1beta1.ClusterManager.GetJSONWebKeys:output_type -> google.container.v1beta1.GetJSONWebKeysResponse
+	136, // 318: google.container.v1beta1.ClusterManager.ListNodePools:output_type -> google.container.v1beta1.ListNodePoolsResponse
 	123, // 319: google.container.v1beta1.ClusterManager.GetNodePool:output_type -> google.container.v1beta1.NodePool
 	95,  // 320: google.container.v1beta1.ClusterManager.CreateNodePool:output_type -> google.container.v1beta1.Operation
 	95,  // 321: google.container.v1beta1.ClusterManager.DeleteNodePool:output_type -> google.container.v1beta1.Operation
@@ -23793,13 +23802,13 @@ type ClusterManagerClient interface {
 	CancelOperation(ctx context.Context, in *CancelOperationRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	// Returns configuration info about the Google Kubernetes Engine service.
 	GetServerConfig(ctx context.Context, in *GetServerConfigRequest, opts ...grpc.CallOption) (*ServerConfig, error)
-	// Lists the node pools for a cluster.
-	ListNodePools(ctx context.Context, in *ListNodePoolsRequest, opts ...grpc.CallOption) (*ListNodePoolsResponse, error)
 	// Gets the public component of the cluster signing keys in
 	// JSON Web Key format.
 	// This API is not yet intended for general use, and is not available for all
 	// clusters.
 	GetJSONWebKeys(ctx context.Context, in *GetJSONWebKeysRequest, opts ...grpc.CallOption) (*GetJSONWebKeysResponse, error)
+	// Lists the node pools for a cluster.
+	ListNodePools(ctx context.Context, in *ListNodePoolsRequest, opts ...grpc.CallOption) (*ListNodePoolsResponse, error)
 	// Retrieves the requested node pool.
 	GetNodePool(ctx context.Context, in *GetNodePoolRequest, opts ...grpc.CallOption) (*NodePool, error)
 	// Creates a node pool for a cluster.
@@ -23998,18 +24007,18 @@ func (c *clusterManagerClient) GetServerConfig(ctx context.Context, in *GetServe
 	return out, nil
 }
 
-func (c *clusterManagerClient) ListNodePools(ctx context.Context, in *ListNodePoolsRequest, opts ...grpc.CallOption) (*ListNodePoolsResponse, error) {
-	out := new(ListNodePoolsResponse)
-	err := c.cc.Invoke(ctx, "/google.container.v1beta1.ClusterManager/ListNodePools", in, out, opts...)
+func (c *clusterManagerClient) GetJSONWebKeys(ctx context.Context, in *GetJSONWebKeysRequest, opts ...grpc.CallOption) (*GetJSONWebKeysResponse, error) {
+	out := new(GetJSONWebKeysResponse)
+	err := c.cc.Invoke(ctx, "/google.container.v1beta1.ClusterManager/GetJSONWebKeys", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *clusterManagerClient) GetJSONWebKeys(ctx context.Context, in *GetJSONWebKeysRequest, opts ...grpc.CallOption) (*GetJSONWebKeysResponse, error) {
-	out := new(GetJSONWebKeysResponse)
-	err := c.cc.Invoke(ctx, "/google.container.v1beta1.ClusterManager/GetJSONWebKeys", in, out, opts...)
+func (c *clusterManagerClient) ListNodePools(ctx context.Context, in *ListNodePoolsRequest, opts ...grpc.CallOption) (*ListNodePoolsResponse, error) {
+	out := new(ListNodePoolsResponse)
+	err := c.cc.Invoke(ctx, "/google.container.v1beta1.ClusterManager/ListNodePools", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -24215,13 +24224,13 @@ type ClusterManagerServer interface {
 	CancelOperation(context.Context, *CancelOperationRequest) (*emptypb.Empty, error)
 	// Returns configuration info about the Google Kubernetes Engine service.
 	GetServerConfig(context.Context, *GetServerConfigRequest) (*ServerConfig, error)
-	// Lists the node pools for a cluster.
-	ListNodePools(context.Context, *ListNodePoolsRequest) (*ListNodePoolsResponse, error)
 	// Gets the public component of the cluster signing keys in
 	// JSON Web Key format.
 	// This API is not yet intended for general use, and is not available for all
 	// clusters.
 	GetJSONWebKeys(context.Context, *GetJSONWebKeysRequest) (*GetJSONWebKeysResponse, error)
+	// Lists the node pools for a cluster.
+	ListNodePools(context.Context, *ListNodePoolsRequest) (*ListNodePoolsResponse, error)
 	// Retrieves the requested node pool.
 	GetNodePool(context.Context, *GetNodePoolRequest) (*NodePool, error)
 	// Creates a node pool for a cluster.
@@ -24313,11 +24322,11 @@ func (*UnimplementedClusterManagerServer) CancelOperation(context.Context, *Canc
 func (*UnimplementedClusterManagerServer) GetServerConfig(context.Context, *GetServerConfigRequest) (*ServerConfig, error) {
 	return nil, status1.Errorf(codes.Unimplemented, "method GetServerConfig not implemented")
 }
-func (*UnimplementedClusterManagerServer) ListNodePools(context.Context, *ListNodePoolsRequest) (*ListNodePoolsResponse, error) {
-	return nil, status1.Errorf(codes.Unimplemented, "method ListNodePools not implemented")
-}
 func (*UnimplementedClusterManagerServer) GetJSONWebKeys(context.Context, *GetJSONWebKeysRequest) (*GetJSONWebKeysResponse, error) {
 	return nil, status1.Errorf(codes.Unimplemented, "method GetJSONWebKeys not implemented")
+}
+func (*UnimplementedClusterManagerServer) ListNodePools(context.Context, *ListNodePoolsRequest) (*ListNodePoolsResponse, error) {
+	return nil, status1.Errorf(codes.Unimplemented, "method ListNodePools not implemented")
 }
 func (*UnimplementedClusterManagerServer) GetNodePool(context.Context, *GetNodePoolRequest) (*NodePool, error) {
 	return nil, status1.Errorf(codes.Unimplemented, "method GetNodePool not implemented")
@@ -24675,24 +24684,6 @@ func _ClusterManager_GetServerConfig_Handler(srv interface{}, ctx context.Contex
 	return interceptor(ctx, in, info, handler)
 }
 
-func _ClusterManager_ListNodePools_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ListNodePoolsRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(ClusterManagerServer).ListNodePools(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/google.container.v1beta1.ClusterManager/ListNodePools",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ClusterManagerServer).ListNodePools(ctx, req.(*ListNodePoolsRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 func _ClusterManager_GetJSONWebKeys_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetJSONWebKeysRequest)
 	if err := dec(in); err != nil {
@@ -24707,6 +24698,24 @@ func _ClusterManager_GetJSONWebKeys_Handler(srv interface{}, ctx context.Context
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(ClusterManagerServer).GetJSONWebKeys(ctx, req.(*GetJSONWebKeysRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ClusterManager_ListNodePools_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListNodePoolsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ClusterManagerServer).ListNodePools(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/google.container.v1beta1.ClusterManager/ListNodePools",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ClusterManagerServer).ListNodePools(ctx, req.(*ListNodePoolsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -25054,12 +25063,12 @@ var _ClusterManager_serviceDesc = grpc.ServiceDesc{
 			Handler:    _ClusterManager_GetServerConfig_Handler,
 		},
 		{
-			MethodName: "ListNodePools",
-			Handler:    _ClusterManager_ListNodePools_Handler,
-		},
-		{
 			MethodName: "GetJSONWebKeys",
 			Handler:    _ClusterManager_GetJSONWebKeys_Handler,
+		},
+		{
+			MethodName: "ListNodePools",
+			Handler:    _ClusterManager_ListNodePools_Handler,
 		},
 		{
 			MethodName: "GetNodePool",
