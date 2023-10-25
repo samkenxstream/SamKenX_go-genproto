@@ -29,7 +29,7 @@ require (
 	cloud.google.com/go/cloudbuild v1.7.0
 	cloud.google.com/go/clouddms v1.5.0
 	cloud.google.com/go/cloudtasks v1.9.0
-	cloud.google.com/go/compute v1.18.0
+	cloud.google.com/go/compute v1.19.1
 	cloud.google.com/go/contactcenterinsights v1.6.0
 	cloud.google.com/go/container v1.13.1
 	cloud.google.com/go/containeranalysis v0.7.0
@@ -124,13 +124,13 @@ require (
 	cloud.google.com/go/webrisk v1.8.0
 	cloud.google.com/go/websecurityscanner v1.5.0
 	cloud.google.com/go/workflows v1.10.0
-	github.com/golang/protobuf v1.5.2
-	google.golang.org/grpc v1.53.0
-	google.golang.org/protobuf v1.28.1
+	github.com/golang/protobuf v1.5.3
+	google.golang.org/grpc v1.56.3
+	google.golang.org/protobuf v1.30.0
 )
 
 require (
-	golang.org/x/net v0.7.0 // indirect
-	golang.org/x/sys v0.5.0 // indirect
-	golang.org/x/text v0.7.0 // indirect
+	golang.org/x/net v0.9.0 // indirect
+	golang.org/x/sys v0.7.0 // indirect
+	golang.org/x/text v0.9.0 // indirect
 )
